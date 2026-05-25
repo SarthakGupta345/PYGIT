@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path
+import json
 import sys
 print("Hello world")
 
@@ -10,15 +11,27 @@ class Repository:
 
         self.object_dir = self.git_dir/'objects'
         self.ref_dir = self.git_dir/'refs'
-        self.head_dir = self.git_dir/'HEAD'
+        self.head_dir = self.ref_dir/'heads'
+        self.head_file = self.git_dir/'HEAD'
 
         self.index_file = self.git_dir/'index'
 
     def init(self)-> bool:
+
+        if self.git_dir.exists():
+            return False
         # directories
         self.git_dir.mkdir()
         self.object_dir.mkdir()
         self.ref_dir.mkdir()
+        self.head_dir.mkdir()
+
+        # create initiala HEAD pointing to main
+
+        self.head_file.write_text("ref: res/heads/master\n")
+        self.index_file.write_text(json.dumps({},indent=2))
+
+        print(f'Initialized empty repository in{self.git_dir}')
 
         return True
 
@@ -45,7 +58,10 @@ def main():
     
     try:
         if args.Command =='init':
-            pass
+            repo = Repository()
+            if not repo.init():
+               print(f'Git repository already exixts in ')
+            
     except Exception as e:
         print(f'Error: {e}')
         sys.exit(1)
